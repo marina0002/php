@@ -1,44 +1,40 @@
 <?php
-function generateFilename($title, $author) {
-    $timestamp = date("YmdHis");
-    $title = strtolower(preg_replace("/[^a-zA-Z0-9]+/", "-", $title));
-    $author = strtolower(preg_replace("/[^a-zA-Z0-9]+/", "-", $author));
-    return $title . "-" . $author . "-" . $timestamp . ".md";
+// Отримання введених даних від користувача
+echo "Введіть назву публікації в блозі: ";
+$title = readline();
+echo "Введіть ім'я автора: ";
+$author = readline();
+echo "Введіть категорію(ї): ";
+$category = readline();
+
+// Перевірка чи вказано вихідний каталог через аргумент командного рядка
+$outputDirectory = isset($argv[1]) ? $argv[1] : getcwd();
+
+// Перевірка та створення необхідних каталогів
+if (!file_exists($outputDirectory)) {
+    mkdir($outputDirectory, 0777, true);
 }
 
-function promptInput($prompt) {
-    echo $prompt . ": ";
-    return trim(fgets(STDIN));
-}
+// Генерація унікальної назви файлу
+$timestamp = date('YmdHis');
+$filename = sprintf('%s-%s-%s.md', strtolower(str_replace(' ', '-', $title)), strtolower(str_replace(' ', '-', $author)), $timestamp);
 
-$title = promptInput("Enter the blog post title");
-$author = promptInput("Enter the author's name");
-$category = promptInput("Enter the category");
-
-if ($argc >= 2) {
-    $outputDir = $argv[1];
-} else {
-    $outputDir = getcwd();
-}
-
-$filename = generateFilename($title, $author);
-$filepath = $outputDir . "/" . $filename;
-
-$date = date("Y-m-d");
-$content = <<<EOD
+// Створення та запис шаблону публікації блогу
+$content = <<<EOT
 ---
-title: "$title"
-author: "$author"
-category: "$category"
-date: "$date"
+назва: "{$title}"
+автор: "{$author}"
+категорія: "{$category}"
+дата: "{$timestamp}"
 ---
 
-Write your blog post content here...
-EOD;
+Напишіть вміст свого блогу тут...
+EOT;
 
-file_put_contents($filepath, $content);
+// Запис шаблону у файл розмітки
+file_put_contents($outputDirectory . '/' . $filename, $content);
 
-echo "Blog post template generated successfully at: $filepath\n";
+// Вивід шляху до файлу для користувача
+echo "Файл успішно згенеровано за шляхом: " . $outputDirectory . '/' . $filename . "\n";
 ?>
 
-# php
